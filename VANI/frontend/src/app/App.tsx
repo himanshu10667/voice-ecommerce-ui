@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, Mic, Bell, MapPin, ChevronRight, ChevronLeft,
@@ -8,6 +8,8 @@ import {
   Mail, Phone, MapPin as LocationIcon, ArrowRight, Truck, Shield, RotateCcw,
 } from "lucide-react";
 import { create } from "zustand";
+import { BGPattern } from "./components/ui/bg-pattern";
+import { Loader } from "./components/ui/loader";
 
 // ─── Dark Mode Context ────────────────────────────────────────────────────────
 
@@ -22,37 +24,37 @@ const th = (light: string, dark: string) => ({ light, dark });
 // Near Black #252422 | Vivid Orange #EB5E28
 
 const P = {
-  forest:   "#252422",
-  teal:     "#EB5E28",
-  emerald:  "#CCC5B9",
-  sage:     "#CCC5B9",
-  frost:    "#FFFCF2",
+  forest: "#1f1816ff",
+  teal: "#8A7968",
+  emerald: "#E6D5B8",
+  sage: "#F9F6F0",
+  frost: "#FFFFFF",
 };
 
 // Semantic tokens
 const T = {
-  pageBg:      th(P.frost,                      "#252422"),
-  navBg:       th("#FFFFFF",                    "#2E2B28"),
-  navBorder:   th("#E8E3DA",                    "#3A3733"),
-  cardBg:      th("#FFFFFF",                    "#302D2A"),
-  cardBorder:  th("#EAE5DC",                    "#3A3733"),
-  mutedBg:     th("#FAF8F2",                    "#2A2724"),
-  inputBg:     th("#F0EDE5",                    "#333028"),
-  inputBorder: th("#DDD8CF",                    "#4A4742"),
-  hoverBg:     th("#EDE8DE",                    "#3A3733"),
-  textPrimary: th(P.forest,                     P.frost),
-  textSecond:  th("#403D39",                    P.emerald),
-  textMuted:   th(P.emerald,                    "#7A7268"),
-  border:      th("#DDD8CF",                    "#3A3733"),
-  accent:      th(P.teal,                       "#F06B30"),
-  accentText:  th("#FFFFFF",                    "#FFFFFF"),
-  emerald:     th(P.emerald,                    "#A09888"),
-  btnBg:       th(P.forest,                     P.frost),
-  btnText:     th("#FFFFFF",                    P.forest),
-  greenBtn:    th(P.teal,                       "#F06B30"),
-  greenText:   th("#FFFFFF",                    "#FFFFFF"),
-  dockBg:      th("rgba(255,252,242,0.97)",     "rgba(37,36,34,0.97)"),
-  dockBorder:  th("#DDD8CF",                    "#3A3733"),
+  pageBg: th("transparent", "transparent"),
+  navBg: th("rgba(249, 246, 240, 0.8)", "rgba(43, 32, 29, 0.8)"),
+  navBorder: th("transparent", "transparent"),
+  cardBg: th("rgba(255, 255, 255, 0.6)", "rgba(138, 121, 104, 0.1)"),
+  cardBorder: th("rgba(255, 255, 255, 0.4)", "rgba(138, 121, 104, 0.15)"),
+  mutedBg: th("rgba(138, 121, 104, 0.1)", "rgba(138, 121, 104, 0.2)"),
+  inputBg: th("rgba(255, 255, 255, 0.6)", "rgba(138, 121, 104, 0.15)"),
+  inputBorder: th("transparent", "transparent"),
+  hoverBg: th("rgba(138, 121, 104, 0.15)", "rgba(138, 121, 104, 0.25)"),
+  textPrimary: th("#2B201D", "#F9F6F0"),
+  textSecond: th("#8A7968", "#E6D5B8"),
+  textMuted: th("#8A7968", "rgba(230, 213, 184, 0.6)"),
+  border: th("rgba(138, 121, 104, 0.15)", "rgba(138, 121, 104, 0.25)"),
+  accent: th("#2B201D", "#E6D5B8"),
+  accentText: th("#F9F6F0", "#2B201D"),
+  emerald: th("#8A7968", "#E6D5B8"),
+  btnBg: th("#2B201D", "#E6D5B8"),
+  btnText: th("#F9F6F0", "#2B201D"),
+  greenBtn: th("#8A7968", "rgba(138, 121, 104, 0.3)"),
+  greenText: th("#FFFFFF", "#E6D5B8"),
+  dockBg: th("rgba(249, 246, 240, 0.85)", "rgba(43, 32, 29, 0.85)"),
+  dockBorder: th("transparent", "transparent"),
 };
 
 function tv(token: { light: string; dark: string }, dark: boolean) {
@@ -100,36 +102,54 @@ const useCart = create<CartStore>((set, get) => ({
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const heroProducts: Product[] = [
-  { id: "h1", name: "Premium Headphones", brand: "Sony", price: 2499, originalPrice: 3999,
+  {
+    id: "h1", name: "Premium Headphones", brand: "Sony", price: 2499, originalPrice: 3999,
     image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8, reviews: 2341, category: "Electronics", description: "Block out the noise. Enjoy the music.", badge: "Best Seller" },
-  { id: "h2", name: "Nike Air Max Excee", brand: "Nike", price: 1999, originalPrice: 2799,
+    rating: 4.8, reviews: 2341, category: "Electronics", description: "Block out the noise. Enjoy the music.", badge: "Best Seller"
+  },
+  {
+    id: "h2", name: "Nike Air Max Excee", brand: "Nike", price: 1999, originalPrice: 2799,
     image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.6, reviews: 1892, category: "Footwear", description: "Comfort you with everyday wear.", badge: "New Arrival" },
-  { id: "h3", name: "Fossil Chronograph", brand: "Fossil", price: 7495, originalPrice: 9999,
+    rating: 4.6, reviews: 1892, category: "Footwear", description: "Comfort you with everyday wear.", badge: "New Arrival"
+  },
+  {
+    id: "h3", name: "Fossil Chronograph", brand: "Fossil", price: 7495, originalPrice: 9999,
     image: "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9, reviews: 876, category: "Watches", description: "Ceramic design. Precision timekeeping.", badge: "Premium" },
+    rating: 4.9, reviews: 876, category: "Watches", description: "Ceramic design. Precision timekeeping.", badge: "Premium"
+  },
 ];
 
 const recommendedProducts: Product[] = [
-  { id: "r1", name: "Hoodie Sweatshirt", brand: "Zara", price: 1750, originalPrice: 2499,
+  {
+    id: "r1", name: "Hoodie Sweatshirt", brand: "Zara", price: 1750, originalPrice: 2499,
     image: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.3, reviews: 542, category: "Clothing", description: "Soft-touch fleece hoodie" },
-  { id: "r2", name: "Laptop Backpack", brand: "Samsonite", price: 1299, originalPrice: 1999,
+    rating: 4.3, reviews: 542, category: "Clothing", description: "Soft-touch fleece hoodie"
+  },
+  {
+    id: "r2", name: "Laptop Backpack", brand: "Samsonite", price: 1299, originalPrice: 1999,
     image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.5, reviews: 1230, category: "Bags", description: "15.6\" slim fit carry" },
-  { id: "r3", name: "Canvas Sneakers", brand: "Converse", price: 1299, originalPrice: 1799,
+    rating: 4.5, reviews: 1230, category: "Bags", description: "15.6\" slim fit carry"
+  },
+  {
+    id: "r3", name: "Canvas Sneakers", brand: "Converse", price: 1299, originalPrice: 1799,
     image: "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.4, reviews: 3201, category: "Footwear", description: "Classic low-top streetwear" },
-  { id: "r4", name: "Slim Fit Jeans", brand: "Levi's", price: 1499, originalPrice: 2199,
+    rating: 4.4, reviews: 3201, category: "Footwear", description: "Classic low-top streetwear"
+  },
+  {
+    id: "r4", name: "Slim Fit Jeans", brand: "Levi's", price: 1499, originalPrice: 2199,
     image: "https://images.unsplash.com/photo-1631112230741-446762ee05ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.2, reviews: 4572, category: "Clothing", description: "511 slim tapered fit denim" },
-  { id: "r5", name: "Oversize T-Shirt", brand: "H&M", price: 699, originalPrice: 999,
+    rating: 4.2, reviews: 4572, category: "Clothing", description: "511 slim tapered fit denim"
+  },
+  {
+    id: "r5", name: "Oversize T-Shirt", brand: "H&M", price: 699, originalPrice: 999,
     image: "https://images.unsplash.com/photo-1571455786673-9d9d6c194f90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.1, reviews: 2890, category: "Clothing", description: "100% cotton relaxed fit" },
-  { id: "r6", name: "Smart Watch", brand: "Apple", price: 32999, originalPrice: 41900,
+    rating: 4.1, reviews: 2890, category: "Clothing", description: "100% cotton relaxed fit"
+  },
+  {
+    id: "r6", name: "Smart Watch", brand: "Apple", price: 32999, originalPrice: 41900,
     image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9, reviews: 18430, category: "Electronics", description: "Health, fitness & connectivity" },
+    rating: 4.9, reviews: 18430, category: "Electronics", description: "Health, fitness & connectivity"
+  },
 ];
 
 const recentlyViewed: Product[] = [
@@ -140,6 +160,74 @@ const recentlyViewed: Product[] = [
   { ...recommendedProducts[1], id: "rv5" },
   { ...heroProducts[1], id: "rv6" },
 ];
+
+const trendingProducts: Product[] = [
+  {
+    id: "t1", name: "Mechanical Keyboard", brand: "Keychron", price: 8999, originalPrice: 11999,
+    image: "https://images.unsplash.com/photo-1595225476474-87563907a212?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.8, reviews: 1542, category: "Electronics", description: "Wireless mechanical keyboard"
+  },
+  {
+    id: "t2", name: "Aviator Sunglasses", brand: "Ray-Ban", price: 5499, originalPrice: 7999,
+    image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.6, reviews: 310, category: "Fashion", description: "Classic aviator style"
+  },
+  {
+    id: "t3", name: "Yoga Mat", brand: "Lululemon", price: 2999, originalPrice: 3499,
+    image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.9, reviews: 892, category: "Sports", description: "Non-slip exercise mat"
+  },
+  {
+    id: "t4", name: "Wireless Mouse", brand: "Logitech", price: 1999, originalPrice: 2499,
+    image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.5, reviews: 4120, category: "Electronics", description: "Ergonomic wireless mouse"
+  },
+  {
+    id: "t5", name: "Denim Jacket", brand: "Levi's", price: 3499, originalPrice: 4999,
+    image: "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.4, reviews: 654, category: "Clothing", description: "Classic trucker jacket"
+  },
+  {
+    id: "t6", name: "Running Shoes", brand: "Adidas", price: 4999, originalPrice: 6999,
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.7, reviews: 11200, category: "Footwear", description: "Lightweight running sneakers"
+  },
+];
+
+const bestSellers: Product[] = [
+  {
+    id: "b1", name: "Noise Cancelling Earbuds", brand: "Bose", price: 18999, originalPrice: 22999,
+    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.9, reviews: 8432, category: "Electronics", description: "QuietComfort Earbuds"
+  },
+  {
+    id: "b2", name: "Leather Wallet", brand: "Tommy Hilfiger", price: 1299, originalPrice: 2499,
+    image: "https://images.unsplash.com/photo-1627123424574-724758594e93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.5, reviews: 1243, category: "Accessories", description: "Genuine leather bi-fold"
+  },
+  {
+    id: "b3", name: "Coffee Maker", brand: "Nespresso", price: 12499, originalPrice: 15999,
+    image: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.7, reviews: 4521, category: "Home", description: "Espresso machine with frother"
+  },
+  {
+    id: "b4", name: "Skincare Set", brand: "The Ordinary", price: 2199, originalPrice: 2999,
+    image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.6, reviews: 8901, category: "Beauty", description: "Daily skincare routine kit"
+  },
+  {
+    id: "b5", name: "Dumbbell Set", brand: "Bowflex", price: 14999, originalPrice: 18999,
+    image: "https://images.unsplash.com/photo-1586401700864-42b71946f32e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.8, reviews: 3120, category: "Sports", description: "Adjustable dumbbells"
+  },
+  {
+    id: "b6", name: "Graphic T-Shirt", brand: "Vans", price: 1199, originalPrice: 1599,
+    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080",
+    rating: 4.3, reviews: 1560, category: "Clothing", description: "Classic logo print tee"
+  },
+];
+
+const allProducts = [...heroProducts, ...recommendedProducts, ...recentlyViewed, ...trendingProducts, ...bestSellers];
 
 // ─── Category Geometric Icons ─────────────────────────────────────────────────
 
@@ -238,16 +326,16 @@ const CatIcon = ({ id, color }: { id: string; color: string }) => {
 // ─── Categories Data ──────────────────────────────────────────────────────────
 
 const categories = [
-  { id: "c1",  label: "Electronics", color: "#FDF0E8", darkColor: "#2E2520", iconColor: "#EB5E28" },
-  { id: "c2",  label: "Fashion",     color: "#FBF2EC", darkColor: "#2A2420", iconColor: "#C4501F" },
-  { id: "c3",  label: "Footwear",    color: "#FDF0E8", darkColor: "#2E2520", iconColor: "#EB5E28" },
-  { id: "c4",  label: "Watches",     color: "#F5EFE6", darkColor: "#282520", iconColor: "#9A8070" },
-  { id: "c5",  label: "Bags",        color: "#FDF0E8", darkColor: "#2E2520", iconColor: "#EB5E28" },
-  { id: "c6",  label: "Sports",      color: "#FBF2EC", darkColor: "#2A2420", iconColor: "#C4501F" },
-  { id: "c7",  label: "Beauty",      color: "#FDF0E8", darkColor: "#2E2520", iconColor: "#9A8878" },
-  { id: "c8",  label: "Books",       color: "#F5EFE6", darkColor: "#282520", iconColor: "#403D39" },
-  { id: "c9",  label: "Home",        color: "#FBF2EC", darkColor: "#2A2420", iconColor: "#7A7068" },
-  { id: "c10", label: "Gaming",      color: "#FDF0E8", darkColor: "#2E2520", iconColor: "#EB5E28" },
+  { id: "c1", label: "Electronics", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c2", label: "Fashion", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c3", label: "Footwear", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c4", label: "Watches", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c5", label: "Bags", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c6", label: "Sports", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c7", label: "Beauty", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c8", label: "Books", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c9", label: "Home", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
+  { id: "c10", label: "Gaming", color: "#F3F4F6", darkColor: "#1A1A1A", iconColor: "#101010" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -259,18 +347,18 @@ const Stars = ({ rating }: { rating: number }) => (
     {[1, 2, 3, 4, 5].map((s) => (
       <Star key={s} size={11}
         style={s <= Math.round(rating)
-          ? { fill: "#EB5E28", color: "#EB5E28" }
-          : { fill: "#DDD8CF", color: "#DDD8CF" }} />
+          ? { fill: P.teal, color: P.teal }
+          : { fill: "#EAEAEA", color: "#EAEAEA" }} />
     ))}
   </div>
 );
 
 // ─── Search Suggestions Dropdown ──────────────────────────────────────────────
 
-function SearchSuggestions({ 
-  query, suggestions, dark, onSuggestionClick, onAddToCart, allProducts 
+function SearchSuggestions({
+  query, suggestions, dark, onSuggestionClick, onAddToCart, allProducts
 }: {
-  query: string; suggestions: Product[]; dark: boolean; 
+  query: string; suggestions: Product[]; dark: boolean;
   onSuggestionClick: (p: Product) => void; onAddToCart: (p: Product) => void; allProducts: Product[];
 }) {
   if (query.trim() === "" || suggestions.length === 0) return null;
@@ -280,17 +368,17 @@ function SearchSuggestions({
       exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}
       className="absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-2xl z-50 overflow-hidden transition-colors duration-300"
       style={{ background: tv(T.navBg, dark), border: `1px solid ${tv(T.cardBorder, dark)}` }}>
-      
+
       <div className="max-h-[380px] overflow-y-auto p-2 space-y-1">
         {suggestions.map((p) => (
           <div key={p.id}
             onClick={() => onSuggestionClick(p)}
             className="w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors duration-200 text-left cursor-pointer hover:opacity-80"
             style={{ background: tv(T.hoverBg, dark) }}>
-            
-            <img src={p.image} alt={p.name} 
+
+            <img src={p.image} alt={p.name}
               className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-            
+
             <div className="flex-1 min-w-0">
               <div className="text-xs font-semibold transition-colors duration-300"
                 style={{ color: tv(T.textPrimary, dark) }}>{p.name}</div>
@@ -323,16 +411,19 @@ function SearchSuggestions({
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
-function Navbar({ 
-  onLocationOpen, onNotifOpen, onVoiceClick, onToggleDark, 
-  search, onSearchChange, onSearchSubmit, suggestions 
+function Navbar({
+  onLocationOpen, onNotifOpen, onVoiceClick, onToggleDark,
+  search, onSearchChange, onSearchSubmit, suggestions,
+  currentPage, onNavigate, onHomeClick
 }: {
   onLocationOpen: () => void; onNotifOpen: () => void;
   onVoiceClick: () => void; onToggleDark: () => void;
-  search: string; onSearchChange: (val: string) => void; 
+  search: string; onSearchChange: (val: string) => void;
   onSearchSubmit: () => void; suggestions: Product[];
+  currentPage: string; onNavigate: (page: string) => void; onHomeClick: () => void;
 }) {
   const dark = useDark();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -342,85 +433,144 @@ function Navbar({
   };
 
   return (
-    <header
-      className="sticky top-0 z-40 transition-colors duration-300"
-      style={{ background: tv(T.navBg, dark), borderBottom: `1px solid ${tv(T.navBorder, dark)}`, height: 72 }}
-    >
-      <div className="max-w-[1400px] mx-auto h-full flex items-center gap-6 px-6">
-        {/* Logo */}
-        <div className="flex-shrink-0 flex flex-col leading-none">
-         <span
-  className="text-[30px] font-medium tracking-[-0.06em]"
-  style={{
-    fontFamily: "'General Sans', sans-serif",
-    color: tv(T.textPrimary, dark),
-  }}
->
-  V A N I
-</span>
-          
-        </div>
+    <div className="sticky top-0 z-50 pt-4 px-4 md:px-6 w-full">
+      <header
+        className="max-w-[1400px] mx-auto h-[72px] flex items-center justify-between px-6 rounded-2xl backdrop-blur-2xl transition-colors duration-300 shadow-sm border"
+        style={{ background: dark ? "rgba(43, 32, 29, 0.6)" : "rgba(249, 246, 240, 0.6)", borderColor: tv(T.border, dark) }}
+      >
+        <div className="max-w-[1400px] w-full h-full flex items-center justify-between">
+          {/* Logo */}
+          <button onClick={onHomeClick} className="flex-shrink-0 flex flex-col leading-none justify-center text-left">
+            <span
+              className="text-[30px] font-medium tracking-wide"
+              style={{
+                fontFamily: "'LEMON MILK', 'Lemon Milk Pro', sans-serif",
+                color: tv(T.textPrimary, dark),
+              }}
+            >
+              V A N I
+            </span>
+            {/* slogan removed per design request */}
+          </button>
 
-        {/* Search */}
-        <div className="flex-1 max-w-2xl mx-auto relative">
-          <div className="relative flex items-center rounded-full border transition-colors duration-300"
-            style={{ background: tv(T.inputBg, dark), borderColor: tv(T.inputBorder, dark) }}>
-            <Search size={16} className="absolute left-4" style={{ color: tv(T.textSecond, dark) }} />
-            <input value={search} onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Search products, categories..."
-              className="w-full bg-transparent py-2.5 pl-10 pr-10 text-sm outline-none transition-colors duration-300"
-              style={{ color: tv(T.textPrimary, dark) }} />
-            <button onClick={onVoiceClick} className="absolute right-3 transition-colors duration-300"
-              style={{ color: tv(T.textSecond, dark) }}>
-              <Mic size={16} />
-            </button>
+          {/* Links (Hidden on mobile) */}
+          <div className="hidden lg:flex items-center gap-6 px-6 ml-4">
+            {["home", "categories", "deals", "about"].map((page) => (
+              <button key={page} onClick={() => onNavigate(page)} className="text-sm font-semibold transition-colors capitalize hover:opacity-70" style={{ color: currentPage === page ? "#EB5E28" : tv(T.textPrimary, dark) }}>{page}</button>
+            ))}
           </div>
-          
-          {/* Suggestions Dropdown */}
-          <AnimatePresence>
-            <SearchSuggestions 
-              query={search} 
-              suggestions={suggestions} 
-              dark={dark}
-              onSuggestionClick={(p) => onSearchChange("")}
-              onAddToCart={() => {}}
-              allProducts={suggestions}
-            />
-          </AnimatePresence>
-        </div>
 
-        {/* Right */}
-        <div className="flex-shrink-0 flex items-center gap-3">
-          <button onClick={onNotifOpen} className="relative p-2 transition-colors duration-300"
-            style={{ color: tv(T.textSecond, dark) }}>
-            <Bell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: "#EB5E28" }} />
-          </button>
-
-          <button onClick={onLocationOpen}
-            className="flex items-center gap-1.5 text-xs transition-colors duration-300 hidden sm:flex"
-            style={{ color: tv(T.textPrimary, dark) }}>
-            <MapPin size={14} style={{ color: P.teal }} />
-            <div className="text-left">
-              <div className="text-[10px] font-medium" style={{ color: tv(T.textSecond, dark) }}>Deliver to</div>
-              <div className="text-xs font-semibold leading-tight">New Delhi, 110001</div>
+          {/* Search */}
+          <div className="flex-1 max-w-2xl mx-auto relative px-8">
+            <div className="relative flex items-center rounded-full border transition-colors duration-300"
+              style={{ background: tv(T.inputBg, dark), borderColor: tv(T.inputBorder, dark) }}>
+              <Search size={16} className="absolute left-4" style={{ color: tv(T.textSecond, dark) }} />
+              <input value={search} onChange={(e) => onSearchChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="In case you wanna type..."
+                className="w-full bg-transparent py-2.5 pl-10 pr-10 text-sm outline-none transition-colors duration-300"
+                style={{ color: tv(T.textPrimary, dark) }} />
+              <button onClick={onVoiceClick} className="absolute right-3 transition-colors duration-300"
+                style={{ color: tv(T.textSecond, dark) }}>
+                <Mic size={16} />
+              </button>
             </div>
-          </button>
 
-          <motion.button whileTap={{ scale: 0.88, rotate: 20 }} onClick={onToggleDark}
-            className="p-2 transition-colors duration-300 rounded-full"
-            style={{ color: tv(T.textSecond, dark) }}>
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
-          </motion.button>
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+              <SearchSuggestions
+                query={search}
+                suggestions={suggestions}
+                dark={dark}
+                onSuggestionClick={(p) => onSearchChange("")}
+                onAddToCart={() => { }}
+                allProducts={suggestions}
+              />
+            </AnimatePresence>
+          </div>
 
-          <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300"
-            style={{ background: tv(T.btnBg, dark), color: tv(T.btnText, dark) }}>
-            <User size={14} />
-          </button>
+          {/* Right */}
+          <div className="flex-shrink-0 flex items-center gap-3 relative">
+            <button onClick={onNotifOpen} className="relative p-2 transition-colors duration-300"
+              style={{ color: tv(T.textSecond, dark) }}>
+              <Bell size={20} />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: P.teal }} />
+            </button>
+
+            <button onClick={onLocationOpen}
+              className="flex items-center gap-1.5 text-xs transition-colors duration-300 hidden sm:flex"
+              style={{ color: tv(T.textPrimary, dark) }}>
+              <MapPin size={14} style={{ color: P.teal }} />
+              <div className="text-left">
+                <div className="text-[10px] font-medium" style={{ color: tv(T.textSecond, dark) }}>Deliver to</div>
+                <div className="text-xs font-semibold leading-tight">New Delhi, 110001</div>
+              </div>
+            </button>
+
+            <motion.button whileTap={{ scale: 0.88, rotate: 20 }} onClick={onToggleDark}
+              className="p-2 transition-colors duration-300 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ color: tv(T.textSecond, dark) }}>
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </motion.button>
+
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 relative z-10"
+                style={{ background: tv(T.btnBg, dark), color: tv(T.btnText, dark) }}>
+                <User size={14} />
+              </button>
+
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-0" onClick={() => setUserMenuOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-48 rounded-2xl shadow-2xl overflow-hidden transition-colors duration-300 z-50 backdrop-blur-xl"
+                      style={{ background: tv(T.navBg, dark), border: `1px solid ${tv(T.cardBorder, dark)}` }}
+                    >
+                      <div className="p-2 space-y-1">
+                        <button className="w-full text-left px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200"
+                          style={{ color: tv(T.textPrimary, dark) }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                          Sign In
+                        </button>
+                        <button className="w-full text-left px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200"
+                          style={{ color: tv(T.textPrimary, dark) }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                          Sign Up
+                        </button>
+
+                        <div className="h-px w-full my-1.5 transition-colors duration-300" style={{ background: tv(T.border, dark) }} />
+
+                        <button className="w-full text-left px-3 py-2 text-xs rounded-xl transition-colors duration-200"
+                          style={{ color: tv(T.textSecond, dark) }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                          My Account
+                        </button>
+                        <button className="w-full text-left px-3 py-2 text-xs rounded-xl transition-colors duration-200"
+                          style={{ color: tv(T.textSecond, dark) }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                          Orders
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
 
@@ -501,9 +651,68 @@ function CategoriesSection() {
   );
 }
 
+// ─── Brand Tagline Section ────────────────────────────────────────────────────
+
+function BrandTagline() {
+  const dark = useDark();
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.2 }}
+      className="max-w-7xl mx-auto px-6 py-6 md:py-10 text-center"
+    >
+      <div className="space-y-2 md:space-y-3">
+        {/* Main Tagline */}
+        <motion.h1
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-glow-animated ${dark ? 'dark' : 'light'}`}
+          style={{ fontFamily: "'Clash Display', sans-serif" }}
+        >
+          More than a Market Place
+        </motion.h1>
+
+        {/* Decorative Line */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="h-1.5 w-24 mx-auto rounded-full"
+          style={{ background: P.teal }}
+        />
+
+        {/* Slogan */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-lg md:text-xl font-semibold"
+          style={{ color: tv(T.textPrimary, dark) }}
+        >
+          Say "HEY VANI" to start shopping with your voice
+        </motion.p>
+
+        {/* Subtle Description */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+          className="text-sm md:text-base"
+          style={{ color: tv(T.textSecond, dark) }}
+        >
+          Discover premium products, incredible deals, and seamless shopping experience
+        </motion.p>
+      </div>
+    </motion.section>
+  );
+}
+
 // ─── Hero Carousel ────────────────────────────────────────────────────────────
 
-function HeroCarousel({ onAddToCart }: { onAddToCart: (p: Product) => void }) {
+function HeroCarousel({ onAddToCart, onProductClick }: { onAddToCart: (p: Product) => void; onProductClick: (p: Product) => void }) {
   const dark = useDark();
   const [current, setCurrent] = useState(0);
   const total = heroProducts.length;
@@ -518,12 +727,12 @@ function HeroCarousel({ onAddToCart }: { onAddToCart: (p: Product) => void }) {
   }, [next]);
 
   const bgColors = dark
-    ? ["#2E2520", "#282520", "#2A2420"]
-    : ["#FDF0E8", "#FBF5EC", "#F5EFE6"];
+    ? ["#1A1A1A", "#141414", "#1F1F1F"]
+    : ["#F3F4F6", "#F9FAFB", "#F3F4F6"];
 
   return (
     <section className="max-w-[1400px] mx-auto px-6 pt-6 pb-4">
-      
+
 
       <div
         className="relative flex items-center justify-center"
@@ -556,7 +765,10 @@ function HeroCarousel({ onAddToCart }: { onAddToCart: (p: Product) => void }) {
                 opacity: { duration: 0.38, ease: "easeOut" },
                 filter: { duration: 0.38, ease: "easeOut" },
               }}
-              onClick={() => !isCenter && setCurrent(idx)}
+              onClick={() => {
+                if (!isCenter) setCurrent(idx);
+                else onProductClick(product);
+              }}
             >
               <HeroCard
                 product={product}
@@ -597,6 +809,10 @@ function HeroCard({ product, bg, onAdd, active }: { product: Product; bg: string
   const dark = useDark();
   const [added, setAdded] = useState(false);
 
+  const activeBg = active
+    ? (dark ? "rgba(138, 121, 104, 0.95)" : "rgba(255, 255, 255, 1)")
+    : tv(T.cardBg, dark);
+
   const handleAdd = () => { onAdd(); setAdded(true); setTimeout(() => setAdded(false), 1500); };
 
   return (
@@ -604,7 +820,7 @@ function HeroCard({ product, bg, onAdd, active }: { product: Product; bg: string
       whileHover={active ? { y: -4 } : {}}
       transition={{ duration: 0.25 }}
       className="rounded-2xl overflow-hidden transition-colors duration-300"
-      style={{ background: tv(T.cardBg, dark) }}
+      style={{ background: activeBg }}
     >
       <div className="relative flex items-center justify-center overflow-hidden" style={{ background: bg, height: 260 }}>
         {product.badge && (
@@ -644,7 +860,7 @@ function HeroCard({ product, bg, onAdd, active }: { product: Product; bg: string
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 
-function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
+function ProductCard({ product, onAdd, onClick }: { product: Product; onAdd: () => void; onClick?: () => void }) {
   const dark = useDark();
   const { wishlist, toggleWishlist } = useCart();
   const isWishlisted = wishlist.includes(product.id);
@@ -659,9 +875,10 @@ function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }
 
   return (
     <motion.div
-      whileHover={{ y: -3, boxShadow: dark ? "0 12px 32px rgba(0,0,0,0.5)" : "0 12px 32px rgba(0,0,0,0.10)" }}
+      onClick={onClick}
+      whileHover={{ y: -3, boxShadow: "0 12px 32px rgba(0,0,0,0.40)" }}
       transition={{ duration: 0.2 }}
-      className="rounded-xl overflow-hidden cursor-pointer group transition-colors duration-300"
+      className="rounded-xl overflow-hidden cursor-pointer group transition-colors duration-300 backdrop-blur-lg"
       style={{ background: tv(T.cardBg, dark), border: `1px solid ${tv(T.cardBorder, dark)}` }}
     >
       <div className="relative aspect-square overflow-hidden transition-colors duration-300"
@@ -669,7 +886,7 @@ function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }
         <img src={product.image} alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {discount > 0 && (
-          <span className="absolute top-2 left-2 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#EB5E28" }}>
+          <span className="absolute top-2 left-2 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: P.teal }}>
             -{discount}%
           </span>
         )}
@@ -711,13 +928,13 @@ function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }
 
 // ─── Recommended Section ──────────────────────────────────────────────────────
 
-function RecommendedSection({ onAddToCart }: { onAddToCart: (p: Product) => void }) {
+function RecommendedSection({ onAddToCart, onProductClick }: { onAddToCart: (p: Product) => void; onProductClick: (p: Product) => void }) {
   return (
     <section className="max-w-[1400px] mx-auto px-6 pb-8">
       <SectionHeader title="Recommended For You" action="View all" />
       <div className="grid grid-cols-6 gap-4">
         {recommendedProducts.map((p) => (
-          <ProductCard key={p.id} product={p} onAdd={() => onAddToCart(p)} />
+          <ProductCard key={p.id} product={p} onAdd={() => onAddToCart(p)} onClick={() => onProductClick(p)} />
         ))}
       </div>
     </section>
@@ -726,15 +943,16 @@ function RecommendedSection({ onAddToCart }: { onAddToCart: (p: Product) => void
 
 // ─── Recently Viewed ──────────────────────────────────────────────────────────
 
-function RecentlyViewedSection({ onAddToCart }: { onAddToCart: (p: Product) => void }) {
+function RecentlyViewedSection({ onAddToCart, onProductClick }: { onAddToCart: (p: Product) => void; onProductClick: (p: Product) => void }) {
   const dark = useDark();
 
   return (
-    <section className="max-w-[1400px] mx-auto px-6 pb-8">
+    <section className="max-w-[1400px] mx-auto px-6 pb-12">
       <SectionHeader title="Recently Viewed" action="Clear" />
       <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
         {recentlyViewed.map((product, i) => (
           <motion.div key={product.id}
+            onClick={() => onProductClick(product)}
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.06 }}
             className="flex-shrink-0 w-[180px] rounded-xl overflow-hidden cursor-pointer group transition-colors duration-300"
@@ -754,7 +972,7 @@ function RecentlyViewedSection({ onAddToCart }: { onAddToCart: (p: Product) => v
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold transition-colors duration-300"
                   style={{ color: tv(T.textPrimary, dark) }}>{fmt(product.price)}</span>
-                <motion.button whileTap={{ scale: 0.88 }} onClick={() => onAddToCart(product)}
+                <motion.button whileTap={{ scale: 0.88 }} onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
                   className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200"
                   style={{ background: tv(T.btnBg, dark), color: tv(T.btnText, dark) }}>
                   <Plus size={11} />
@@ -765,6 +983,113 @@ function RecentlyViewedSection({ onAddToCart }: { onAddToCart: (p: Product) => v
         ))}
       </div>
     </section>
+  );
+}
+
+// ─── Trending Now ─────────────────────────────────────────────────────────────
+
+function TrendingSection({ onAddToCart, onProductClick }: { onAddToCart: (p: Product) => void; onProductClick: (p: Product) => void }) {
+  return (
+    <section className="max-w-[1400px] mx-auto px-6 pb-12">
+      <SectionHeader title="Trending Now" action="Discover" />
+      <div className="grid grid-cols-6 gap-4">
+        {trendingProducts.map((p) => (
+          <ProductCard key={p.id} product={p} onAdd={() => onAddToCart(p)} onClick={() => onProductClick(p)} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Best Sellers ─────────────────────────────────────────────────────────────
+
+function BestSellersSection({ onAddToCart, onProductClick }: { onAddToCart: (p: Product) => void; onProductClick: (p: Product) => void }) {
+  return (
+    <section className="max-w-[1400px] mx-auto px-6 pb-12">
+      <SectionHeader title="Best Sellers" action="View all" />
+      <div className="grid grid-cols-6 gap-4">
+        {bestSellers.map((p) => (
+          <ProductCard key={p.id} product={p} onAdd={() => onAddToCart(p)} onClick={() => onProductClick(p)} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Wishlist Drawer ────────────────────────────────────────────────────────────
+
+function WishlistDrawer({ open, onClose, onAddToCart }: { open: boolean; onClose: () => void; onAddToCart: (p: Product) => void }) {
+  const dark = useDark();
+  const { wishlist, toggleWishlist } = useCart();
+  const wishlistProducts = allProducts.filter(p => wishlist.includes(p.id));
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
+          <motion.div
+            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="fixed right-0 top-0 h-full w-[380px] z-50 shadow-2xl flex flex-col transition-colors duration-300"
+            style={{ background: tv(T.navBg, dark) }}
+          >
+            <div className="flex items-center justify-between p-5 transition-colors duration-300"
+              style={{ borderBottom: `1px solid ${tv(T.border, dark)}` }}>
+              <div className="flex items-center gap-2">
+                <Heart size={18} style={{ color: tv(T.textPrimary, dark) }} />
+                <h3 className="font-semibold transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
+                  Your Wishlist
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: tv(T.btnBg, dark), color: tv(T.btnText, dark) }}>
+                  {wishlistProducts.length}
+                </span>
+              </div>
+              <button onClick={onClose} style={{ color: tv(T.textSecond, dark) }}><X size={18} /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              {wishlistProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+                  <Heart size={40} style={{ color: tv(T.border, dark) }} />
+                  <p className="text-sm" style={{ color: tv(T.textSecond, dark) }}>Your wishlist is empty</p>
+                  <button onClick={onClose} className="text-xs font-semibold" style={{ color: P.teal }}>Explore Products</button>
+                </div>
+              ) : (
+                wishlistProducts.map((item) => (
+                  <motion.div key={item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 p-3 rounded-xl transition-colors duration-300"
+                    style={{ background: tv(T.mutedBg, dark) }}>
+                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider transition-colors duration-300"
+                        style={{ color: tv(T.textSecond, dark) }}>{item.brand}</div>
+                      <div className="text-xs font-semibold line-clamp-1 transition-colors duration-300"
+                        style={{ color: tv(T.textPrimary, dark) }}>{item.name}</div>
+                      <div className="text-sm font-bold mt-0.5 transition-colors duration-300"
+                        style={{ color: tv(T.textPrimary, dark) }}>{fmt(item.price)}</div>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <button onClick={() => { onAddToCart(item); toggleWishlist(item.id); }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5"
+                          style={{ background: tv(T.btnBg, dark), color: tv(T.btnText, dark) }}>
+                          <ShoppingCart size={11} /> Move to Cart
+                        </button>
+                        <button onClick={() => toggleWishlist(item.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -907,8 +1232,10 @@ function FiltersPanel({ open, onClose }: { open: boolean; onClose: () => void })
                     <label key={c} className="flex items-center gap-2.5 cursor-pointer">
                       <div onClick={() => toggleCat(c)}
                         className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
-                        style={{ background: selectedCats.includes(c) ? tv(T.btnBg, dark) : "transparent",
-                          borderColor: selectedCats.includes(c) ? tv(T.btnBg, dark) : tv(T.border, dark) }}>
+                        style={{
+                          background: selectedCats.includes(c) ? tv(T.btnBg, dark) : "transparent",
+                          borderColor: selectedCats.includes(c) ? tv(T.btnBg, dark) : tv(T.border, dark)
+                        }}>
                         {selectedCats.includes(c) && <Check size={10} style={{ color: tv(T.btnText, dark) }} />}
                       </div>
                       <span className="text-sm transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>{c}</span>
@@ -1137,9 +1464,9 @@ function BottomDock({ onFilters, onCart, onWishlist, onVoiceTrain, cartCount, wi
 
   const items = [
     { label: "Voice Train", icon: <Volume2 size={15} />, onClick: onVoiceTrain },
-    { label: "Filters",     icon: <SlidersHorizontal size={15} />, onClick: onFilters },
-    { label: "Cart",        icon: <ShoppingCart size={15} />, onClick: onCart,     badge: cartCount },
-    { label: "Wishlist",    icon: <Heart size={15} />,        onClick: onWishlist, badge: wishlistCount },
+    { label: "Filters", icon: <SlidersHorizontal size={15} />, onClick: onFilters },
+    { label: "Cart", icon: <ShoppingCart size={15} />, onClick: onCart, badge: cartCount },
+    { label: "Wishlist", icon: <Heart size={15} />, onClick: onWishlist, badge: wishlistCount },
   ];
 
   return (
@@ -1147,82 +1474,30 @@ function BottomDock({ onFilters, onCart, onWishlist, onVoiceTrain, cartCount, wi
       <motion.div
         initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 22, stiffness: 250, delay: 0.3 }}
-        className="backdrop-blur-xl rounded-full shadow-2xl px-6 py-3 flex items-center gap-2 transition-colors duration-300"
-        style={{ background: tv(T.dockBg, dark), border: `1px solid ${tv(T.dockBorder, dark)}` }}
+        className="backdrop-blur-2xl rounded-full shadow-2xl px-6 py-3 flex items-center gap-2 transition-colors duration-300 border"
+        style={{ background: dark ? "rgba(43, 32, 29, 0.75)" : "rgba(138, 121, 104, 0.75)", borderColor: dark ? "rgba(230, 213, 184, 0.15)" : "rgba(255,255,255,0.2)" }}
       >
         {/* Left items */}
         {items.slice(0, 2).map((item, idx) => (
-          <motion.button key={idx} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.93 }}
-            onClick={item.onClick}
-            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-colors duration-200"
-            style={{ color: tv(T.textSecond, dark) }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
-            {item.icon}
-            <span className="text-[10px] font-semibold tracking-wide whitespace-nowrap">{item.label}</span>
-          </motion.button>
+          <div key={idx} className="relative group">
+            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.93 }}
+              onClick={item.onClick}
+              className="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200"
+              style={{ color: "#FFFFFF" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              {item.icon && React.cloneElement(item.icon as any, { size: 22 })}
+            </motion.button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-black/80 text-white text-xs font-semibold rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              {item.label}
+            </div>
+          </div>
         ))}
 
         {/* Center MIC / ORB */}
         <div className="mx-3 relative flex items-center justify-center" style={{ width: 56, height: 56 }}>
 
-          {/* Floating orb — rises above dock when listening */}
-          <AnimatePresence>
-            {listening && (
-              <motion.button
-                key="orb"
-                onClick={onMicClick}
-                initial={{ scale: 0, opacity: 0, y: 0 }}
-                animate={{ scale: 1, opacity: 1, y: -90 }}
-                exit={{ scale: 0, opacity: 0, y: 0 }}
-                transition={{ type: "spring", stiffness: 280, damping: 22 }}
-                style={{
-                  position: "absolute",
-                  width: 110, height: 110,
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  background: "#060606",
-                  filter: "drop-shadow(0 0 12px #ff3e1caa) drop-shadow(0 0 12px #1c8cffaa)",
-                  zIndex: 50,
-                }}
-              >
-                {/* Red star blob */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-                  style={{
-                    position: "absolute",
-                    left: "-120%", top: "-25%",
-                    width: "160%", aspectRatio: "1",
-                    borderRadius: "50%",
-                    background: "#ff3e1c",
-                    clipPath: "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
-                  }}
-                />
-                {/* Blue cross blob */}
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 8, ease: "linear", repeat: Infinity }}
-                  style={{
-                    position: "absolute",
-                    right: "-120%", bottom: "-25%",
-                    width: "160%", aspectRatio: "1",
-                    borderRadius: "50%",
-                    background: "#1c8cff",
-                    clipPath: "polygon(20% 0%,0% 20%,30% 50%,0% 80%,20% 100%,50% 70%,80% 100%,100% 80%,70% 50%,100% 20%,80% 0%,50% 30%)",
-                  }}
-                />
-                {/* Dark blurred core overlay */}
-                <div style={{
-                  position: "absolute", inset: "15%",
-                  borderRadius: "50%",
-                  background: "#060606",
-                  filter: "blur(14px)",
-                }} />
-              </motion.button>
-            )}
-          </AnimatePresence>
+
 
           {/* Mic button — always in dock */}
           <motion.button
@@ -1248,20 +1523,24 @@ function BottomDock({ onFilters, onCart, onWishlist, onVoiceTrain, cartCount, wi
 
         {/* Right items */}
         {items.slice(2).map((item, idx) => (
-          <motion.button key={idx} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.93 }}
-            onClick={item.onClick}
-            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-colors duration-200"
-            style={{ color: tv(T.textSecond, dark) }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = tv(T.hoverBg, dark))}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
-            {item.icon}
-            {"badge" in item && item.badge! > 0 && (
-              <span className="absolute top-1 left-6 w-3.5 h-3.5 text-white text-[8px] font-bold rounded-full flex items-center justify-center" style={{ background: "#EB5E28" }}>
-                {item.badge}
-              </span>
-            )}
-            <span className="text-[10px] font-semibold tracking-wide whitespace-nowrap">{item.label}</span>
-          </motion.button>
+          <div key={idx} className="relative group">
+            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.93 }}
+              onClick={item.onClick}
+              className="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200"
+              style={{ color: "#FFFFFF" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              {item.icon && React.cloneElement(item.icon as any, { size: 22 })}
+              {"badge" in item && item.badge! > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center" style={{ background: P.forest, fontSize: "10px" }}>
+                  {item.badge}
+                </span>
+              )}
+            </motion.button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-black/80 text-white text-xs font-semibold rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              {item.label}
+            </div>
+          </div>
         ))}
       </motion.div>
     </div>
@@ -1270,22 +1549,22 @@ function BottomDock({ onFilters, onCart, onWishlist, onVoiceTrain, cartCount, wi
 
 // ─── Search Results Panel ────────────────────────────────────────────────────
 
-function SearchResults({ 
-  open, query, onClose, onAddToCart, allProducts 
+function SearchResults({
+  open, query, onClose, onAddToCart, allProducts
 }: {
   open: boolean; query: string; onClose: () => void; onAddToCart: (p: Product) => void; allProducts: Product[];
 }) {
   const dark = useDark();
-  
-  const filtered = query.trim() === "" 
-    ? [] 
+
+  const filtered = query.trim() === ""
+    ? []
     : allProducts.filter((p) => {
-        const q = query.toLowerCase();
-        return p.name.toLowerCase().includes(q) 
-          || p.brand.toLowerCase().includes(q)
-          || p.category.toLowerCase().includes(q)
-          || p.description.toLowerCase().includes(q);
-      });
+      const q = query.toLowerCase();
+      return p.name.toLowerCase().includes(q)
+        || p.brand.toLowerCase().includes(q)
+        || p.category.toLowerCase().includes(q)
+        || p.description.toLowerCase().includes(q);
+    });
 
   return (
     <AnimatePresence>
@@ -1298,7 +1577,7 @@ function SearchResults({
             onClick={(e) => e.stopPropagation()}
             className="fixed top-20 left-1/2 -translate-x-1/2 w-[min(90vw,800px)] max-h-[60vh] rounded-2xl shadow-2xl z-50 overflow-hidden transition-colors duration-300 flex flex-col"
             style={{ background: tv(T.navBg, dark), border: `1px solid ${tv(T.cardBorder, dark)}` }}>
-            
+
             {/* Header */}
             <div className="p-5 transition-colors duration-300"
               style={{ borderBottom: `1px solid ${tv(T.border, dark)}` }}>
@@ -1346,7 +1625,7 @@ function SearchResults({
 
 function Footer() {
   const dark = useDark();
-  
+
   const footerSections = [
     {
       title: "Shop",
@@ -1381,13 +1660,13 @@ function Footer() {
   ];
 
   return (
-    <footer className="transition-colors duration-300" style={{ background: tv(T.navBg, dark) }}>
+    <footer className="transition-colors duration-300 backdrop-blur-xl" style={{ background: tv(T.navBg, dark) }}>
       {/* Trust Badges Section */}
       <div className="border-b transition-colors duration-300" style={{ borderColor: tv(T.navBorder, dark) }}>
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {trustBadges.map((badge) => (
-              <div key={badge.label} className="flex items-center gap-4 p-4 rounded-lg transition-colors duration-300" 
+              <div key={badge.label} className="flex items-center gap-4 p-4 rounded-lg transition-colors duration-300"
                 style={{ background: tv(T.mutedBg, dark) }}>
                 <div style={{ color: tv(T.accent, dark) }}>
                   <badge.icon size={28} />
@@ -1438,111 +1717,86 @@ function Footer() {
         </div>
       </div>
 
-      {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
-          {/* Brand Section */}
+    </footer>
+  );
+}
+
+// ─── Product Details View ───────────────────────────────────────────────────────
+
+function ProductDetailsView({ product, onBack, onAddToCart }: { product: Product; onBack: () => void; onAddToCart: (p: Product) => void }) {
+  const dark = useDark();
+  const { wishlist, toggleWishlist } = useCart();
+  const isWishlisted = wishlist.includes(product.id);
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = () => { onAddToCart(product); setAdded(true); setTimeout(() => setAdded(false), 1500); };
+
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+      className="max-w-[1200px] mx-auto px-6 py-8 min-h-[80vh]">
+      <button onClick={onBack} className="flex items-center gap-2 mb-8 font-semibold transition-colors hover:opacity-80" style={{ color: tv(T.textSecond, dark) }}>
+        <ChevronLeft size={20} /> Back to Products
+      </button>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+        {/* Image Gallery */}
+        <div className="relative rounded-3xl overflow-hidden aspect-square shadow-xl border" style={{ background: tv(T.mutedBg, dark), borderColor: tv(T.border, dark) }}>
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+          {discount > 0 && (
+            <span className="absolute top-5 left-5 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg" style={{ background: P.teal }}>
+              -{discount}% OFF
+            </span>
+          )}
+          <button onClick={() => toggleWishlist(product.id)}
+            className="absolute top-5 right-5 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ background: tv(T.cardBg, dark) }}>
+            <Heart size={22} className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"} />
+          </button>
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-2xl font-bold mb-4 transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-              <span style={{ color: tv(T.accent, dark) }}>V</span>ANI
-            </h2>
-            <p className="text-sm mb-6 transition-colors duration-300" style={{ color: tv(T.textMuted, dark) }}>
-              Your ultimate destination for premium products, fast delivery, and exceptional customer service.
+            <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: P.teal }}>{product.brand}</div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: "'Crox LightX', sans-serif", color: tv(T.textPrimary, dark) }}>{product.name}</h1>
+            <div className="flex items-center gap-4 mb-2">
+              <Stars rating={product.rating} />
+              <span className="text-sm font-semibold" style={{ color: tv(T.textSecond, dark) }}>{product.rating} ({product.reviews.toLocaleString()} reviews)</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-end gap-3 mb-2">
+              <span className="text-4xl font-bold" style={{ color: tv(T.textPrimary, dark) }}>{fmt(product.price)}</span>
+              {product.originalPrice && (
+                <span className="text-xl line-through mb-1" style={{ color: tv(T.textMuted, dark) }}>{fmt(product.originalPrice)}</span>
+              )}
+            </div>
+            <p className="text-sm font-semibold" style={{ color: tv(T.textSecond, dark) }}>Inclusive of all taxes</p>
+          </div>
+
+          <div className="w-full h-[1px]" style={{ background: tv(T.border, dark) }} />
+
+          <div>
+            <h3 className="text-xl font-bold mb-3" style={{ color: tv(T.textPrimary, dark) }}>Description</h3>
+            <p className="leading-relaxed text-base" style={{ color: tv(T.textSecond, dark) }}>
+              {product.description}. Designed to deliver an unparalleled experience, this premium product combines sophisticated aesthetics with cutting-edge functionality. A must-have for those who appreciate the finer things.
             </p>
-            <div className="flex gap-3">
-              {socialLinks.map(({ icon: Icon, link, label }) => (
-                <a key={label} href={link}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-                  style={{
-                    background: tv(T.mutedBg, dark),
-                    color: tv(T.accent, dark)
-                  }}
-                  aria-label={label}>
-                  <Icon size={18} />
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Links Sections */}
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold mb-4 transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-                {section.title}
-              </h4>
-              <ul className="space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm transition-all duration-200 hover:translate-x-1 inline-block"
-                      style={{ color: tv(T.textMuted, dark) }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = tv(T.accent, dark)}
-                      onMouseLeave={(e) => e.currentTarget.style.color = tv(T.textMuted, dark)}>
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Contact Section */}
-        <div className="border-t transition-colors duration-300 pt-8 mb-8" style={{ borderColor: tv(T.navBorder, dark) }}>
-          <h4 className="font-semibold mb-4 transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-            Get In Touch
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="tel:+91-1234567890" className="flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 hover:opacity-80"
-              style={{ background: tv(T.mutedBg, dark) }}>
-              <Phone size={20} style={{ color: tv(T.accent, dark) }} />
-              <div>
-                <div className="text-xs transition-colors duration-300" style={{ color: tv(T.textMuted, dark) }}>
-                  Call Us
-                </div>
-                <div className="font-semibold text-sm transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-                  +91-1234567890
-                </div>
-              </div>
-            </a>
-            <a href="mailto:support@vani.com" className="flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 hover:opacity-80"
-              style={{ background: tv(T.mutedBg, dark) }}>
-              <Mail size={20} style={{ color: tv(T.accent, dark) }} />
-              <div>
-                <div className="text-xs transition-colors duration-300" style={{ color: tv(T.textMuted, dark) }}>
-                  Email Us
-                </div>
-                <div className="font-semibold text-sm transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-                  support@vani.com
-                </div>
-              </div>
-            </a>
-            <a href="#" className="flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 hover:opacity-80"
-              style={{ background: tv(T.mutedBg, dark) }}>
-              <LocationIcon size={20} style={{ color: tv(T.accent, dark) }} />
-              <div>
-                <div className="text-xs transition-colors duration-300" style={{ color: tv(T.textMuted, dark) }}>
-                  Visit Us
-                </div>
-                <div className="font-semibold text-sm transition-colors duration-300" style={{ color: tv(T.textPrimary, dark) }}>
-                  123 Market St, City
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        {/* Bottom Footer */}
-        <div className="border-t transition-colors duration-300 pt-6 flex flex-col md:flex-row justify-between items-center gap-4"
-          style={{ borderColor: tv(T.navBorder, dark) }}>
-          <p className="text-sm transition-colors duration-300" style={{ color: tv(T.textMuted, dark) }}>
-          
-          </p>
-          <div className="flex gap-4">
-            
+          <div className="pt-4">
+            <motion.button whileTap={{ scale: 0.98 }} onClick={handleAdd}
+              className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 shadow-2xl"
+              style={{ background: added ? P.greenBtn : tv(T.btnBg, dark), color: added ? "#fff" : tv(T.btnText, dark) }}>
+              {added ? <><Check size={22} /> Added to Cart</> : <><ShoppingCart size={22} /> Add to Cart</>}
+            </motion.button>
           </div>
         </div>
       </div>
-    </footer>
+    </motion.div>
   );
 }
 
@@ -1550,6 +1804,7 @@ function Footer() {
 
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -1559,22 +1814,48 @@ export default function App() {
   const [dark, setDark] = useState(false);
   const [search, setSearch] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentPage, setCurrentPage] = useState<"home" | "categories" | "deals" | "about">("home");
   const recognitionRef = useRef<any>(null);
-  const { addItem, count, wishlist } = useCart();
 
-  // Combine all products for searching
-  const allProducts = [...heroProducts, ...recommendedProducts, ...recentlyViewed];
+  const goHome = () => {
+    setSelectedProduct(null);
+    setCurrentPage("home");
+  };
+
+  const handleNavigate = (page: string) => {
+    setSelectedProduct(null);
+    setCurrentPage(page as any);
+  };
+  const { addItem, count, wishlist } = useCart();
+  const [appLoading, setAppLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Simulate initial loading sequence for luxury feel
+    const timer = setTimeout(() => setAppLoading(false), 2000);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Get suggestions - top 6 matching products while typing
   const suggestions = search.trim() === ""
     ? []
     : allProducts.filter((p) => {
-        const q = search.toLowerCase();
-        return p.name.toLowerCase().includes(q) 
-          || p.brand.toLowerCase().includes(q)
-          || p.category.toLowerCase().includes(q)
-          || p.description.toLowerCase().includes(q);
-      }).slice(0, 6);
+      const q = search.toLowerCase();
+      return p.name.toLowerCase().includes(q)
+        || p.brand.toLowerCase().includes(q)
+        || p.category.toLowerCase().includes(q)
+        || p.description.toLowerCase().includes(q);
+    }).slice(0, 6);
 
   const handleSearchSubmit = () => {
     if (search.trim()) {
@@ -1602,52 +1883,118 @@ export default function App() {
   const stopListening = useCallback(() => { recognitionRef.current?.stop(); setListening(false); }, []);
   const handleMicClick = () => listening ? stopListening() : startListening();
 
+  if (appLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#2B201D] text-[#F9F6F0]">
+        <Loader color="#E6D5B8" size={60} />
+        <div className="mt-8 text-sm tracking-widest uppercase" style={{ fontFamily: "'Crox LightX', sans-serif" }}>
+          Initializing VANI
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DarkCtx.Provider value={dark}>
-      <div className="min-h-screen transition-colors duration-300"
-        style={{ background: tv(T.pageBg, dark), fontFamily: "Inter, sans-serif" }}>
-        <Navbar
-          onLocationOpen={() => setLocationOpen(true)}
-          onNotifOpen={() => setNotifOpen(!notifOpen)}
-          onVoiceClick={handleMicClick}
-          onToggleDark={() => setDark((d) => !d)}
-          search={search}
-          onSearchChange={setSearch}
-          onSearchSubmit={handleSearchSubmit}
-          suggestions={suggestions}
-        />
+      <AnimatePresence>
+        {isOffline && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md text-[#F9F6F0]">
+            <Loader color="#EB5E28" size={60} />
+            <div className="mt-8 text-xl font-semibold tracking-widest uppercase" style={{ fontFamily: "'Crox LightX', sans-serif" }}>Network Unavailable</div>
+            <div className="mt-2 text-sm text-gray-400">Waiting for connection...</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className={`animated-bg ${dark ? "dark-bg" : "light-bg"}`} />
+      <div className="noise-overlay" />
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <BGPattern variant="grid" mask="fade-edges" size={48} fill={dark ? "rgba(230, 213, 184, 0.07)" : "rgba(43, 32, 29, 0.05)"} />
+      </div>
+      <div className="min-h-screen relative overflow-clip transition-colors duration-300"
+        style={{
+          fontFamily: "Inter, sans-serif",
+          backgroundColor: tv(T.pageBg, dark)
+        }}>
+        <div className="relative" style={{ zIndex: 10 }}>
+          <Navbar
+            onLocationOpen={() => setLocationOpen(true)}
+            onNotifOpen={() => setNotifOpen(!notifOpen)}
+            onVoiceClick={handleMicClick}
+            onToggleDark={() => setDark((d) => !d)}
+            search={search}
+            onSearchChange={setSearch}
+            onSearchSubmit={handleSearchSubmit}
+            suggestions={suggestions}
+            currentPage={currentPage}
+            onNavigate={handleNavigate}
+            onHomeClick={goHome}
+          />
 
-        <main className="pb-32">
-          <HeroCarousel onAddToCart={addItem} />
-          <RecommendedSection onAddToCart={addItem} />
-          <RecentlyViewedSection onAddToCart={addItem} />
-        </main>
+          <main className="pb-32 pt-8">
+            <AnimatePresence mode="wait">
+              {selectedProduct ? (
+                <ProductDetailsView key="details" product={selectedProduct} onBack={() => setSelectedProduct(null)} onAddToCart={addItem} />
+              ) : currentPage === "categories" ? (
+                <motion.div key="categories" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <CategoriesSection />
+                  <TrendingSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                </motion.div>
+              ) : currentPage === "deals" ? (
+                <motion.div key="deals" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <BestSellersSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                  <RecommendedSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                </motion.div>
+              ) : currentPage === "about" ? (
+                <motion.div key="about" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="max-w-[800px] mx-auto px-6 py-20 text-center">
+                  <h1 className="text-5xl font-bold mb-8" style={{ fontFamily: "'Crox LightX', sans-serif", color: tv(T.textPrimary, dark) }}>About VANI</h1>
+                  <p className="text-lg leading-relaxed mb-6" style={{ color: tv(T.textSecond, dark) }}>
+                    VANI stands for <strong style={{ color: tv(T.textPrimary, dark) }}>Voice Assisted Navigation for Intelligent commerce</strong>. We are redefining the luxury e-commerce experience by merging cutting-edge voice AI with breathtaking, seamless design.
+                  </p>
+                  <p className="text-lg leading-relaxed" style={{ color: tv(T.textSecond, dark) }}>
+                    Every element of our platform is crafted to provide a calm, frictionless, and premium shopping journey. Just speak, and VANI will guide you.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <BrandTagline />
+                  <HeroCarousel onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                  <RecommendedSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                  <TrendingSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                  <BestSellersSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                  <RecentlyViewedSection onAddToCart={addItem} onProductClick={setSelectedProduct} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
 
-        <Footer />
+          <Footer />
 
-        <BottomDock
-          onFilters={() => setFiltersOpen(true)}
-          onCart={() => setCartOpen(true)}
-          onWishlist={() => {}}
-          onVoiceTrain={() => setVoiceOpen(true)}
-          cartCount={count()}
-          wishlistCount={wishlist.length}
-          listening={listening}
-          onMicClick={handleMicClick}
-        />
+          <BottomDock
+            onFilters={() => setFiltersOpen(true)}
+            onCart={() => setCartOpen(true)}
+            onWishlist={() => setWishlistOpen(true)}
+            onVoiceTrain={() => setVoiceOpen(true)}
+            cartCount={count()}
+            wishlistCount={wishlist.length}
+            listening={listening}
+            onMicClick={handleMicClick}
+          />
 
-        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-        <FiltersPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} />
-        <LocationModal open={locationOpen} onClose={() => setLocationOpen(false)} />
-        <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
-        <VoicePopup open={voiceOpen} transcript={transcript} listening={listening} onClose={() => setVoiceOpen(false)} />
-        <SearchResults 
-          open={submittedSearch.trim() !== ""} 
-          query={submittedSearch} 
-          onClose={() => setSubmittedSearch("")} 
-          onAddToCart={addItem}
-          allProducts={allProducts}
-        />
+          <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+          <WishlistDrawer open={wishlistOpen} onClose={() => setWishlistOpen(false)} onAddToCart={addItem} />
+          <FiltersPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+          <LocationModal open={locationOpen} onClose={() => setLocationOpen(false)} />
+          <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
+          <VoicePopup open={voiceOpen} transcript={transcript} listening={listening} onClose={() => setVoiceOpen(false)} />
+          <SearchResults
+            open={submittedSearch.trim() !== ""}
+            query={submittedSearch}
+            onClose={() => setSubmittedSearch("")}
+            onAddToCart={addItem}
+            allProducts={allProducts}
+          />
+        </div>
       </div>
     </DarkCtx.Provider>
   );
